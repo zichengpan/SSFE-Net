@@ -10,7 +10,7 @@ We provide the source code on two benchmark datasets at the moment, i.e., CUB200
 ## Acknowledgment
 We thank the following repos for providing helpful components/functions in our work.
 
-- [CSS](https://github.com/anyuexuan/CSS))
+- [CSS](https://github.com/anyuexuan/CSS)
 
 - [CEC](https://github.com/icoz69/CEC-CVPR2021)
 
