@@ -1,4 +1,4 @@
-# SSFE-Net
+# [WACV 2023] SSFE-Net: Self-Supervised Feature Enhancement for Ultra-Fine-Grained Few-Shot Class Incremental Learning
 Code for "SSFE-Net: Self-Supervised Feature Enhancement for Ultra-Fine-Grained Few-Shot Class Incremental Learning", [[paper]](https://openaccess.thecvf.com/content/WACV2023/html/Pan_SSFE-Net_Self-Supervised_Feature_Enhancement_for_Ultra-Fine-Grained_Few-Shot_Class_Incremental_Learning_WACV_2023_paper.html) (WACV23)
 
 ## Abstract
