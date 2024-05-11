@@ -7,6 +7,18 @@ Ultra-Fine-Grained Visual Categorization (ultra-FGVC) has become a popular probl
 ## Dataset
 We provide the source code on two benchmark datasets at the moment, i.e., CUB200 and miniImageNet. The source code for the Ultra-FGVC part of the training will be updated shortly. For the existing two datasets, please follow the guidelines in [CEC](https://github.com/icoz69/CEC-CVPR2021) to prepare them.
 
+
+## Training Scripts
+You can run the code by the following commands or simply use ```sh train.sh```.
+- Train CUB200
+    ```
+    python train.py -project ssfe -dataset cub200 -base_mode 'ft_cos' -new_mode 'avg_cos' -gamma 0.25 -lr_base 0.005 -lr_new 0.1 -decay 0.0005 -epochs_base 100 -schedule Milestone -milestones 20 60 80 -gpu '0' -temperature 16 -dataroot ./data -batch_size_base 32 -from_scratch
+    ```
+- Train Mini-ImageNet
+    ```
+    python train.py -project ssfe -dataset mini_imagenet -base_mode 'ft_cos' -new_mode 'avg_cos' -gamma 0.1 -lr_base 0.1 -lr_new 0.1 -decay 0.0005 -epochs_base 100 -schedule Cosine -gpu 0 -temperature 16 -dataroot ./data -from_scratch
+    ```
+
 ## Acknowledgment
 We thank the following repos for providing helpful components/functions in our work.
 
