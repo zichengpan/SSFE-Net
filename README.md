@@ -19,6 +19,19 @@ You can run the code by the following commands or simply use ```sh train.sh```.
     python train.py -project ssfe -dataset mini_imagenet -base_mode 'ft_cos' -new_mode 'avg_cos' -gamma 0.1 -lr_base 0.1 -lr_new 0.1 -decay 0.0005 -epochs_base 100 -schedule Cosine -gpu 0 -temperature 16 -dataroot ./data -from_scratch
     ```
 
+## Citation
+If you find our code or paper useful, please give us a citation.
+```bash
+@InProceedings{Pan_2023_WACV,
+    author    = {Pan, Zicheng and Yu, Xiaohan and Zhang, Miaohua and Gao, Yongsheng},
+    title     = {SSFE-Net: Self-Supervised Feature Enhancement for Ultra-Fine-Grained Few-Shot Class Incremental Learning},
+    booktitle = {Proceedings of the IEEE/CVF Winter Conference on Applications of Computer Vision (WACV)},
+    month     = {January},
+    year      = {2023},
+    pages     = {6275-6284}
+}
+```
+
 ## Acknowledgment
 We thank the following repos for providing helpful components/functions in our work.
 
