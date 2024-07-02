@@ -22,7 +22,7 @@ class MYNET(nn.Module):
         self.mode = mode
         self.args = args
 
-        if self.args.dataset in ['mini_imagenet']:
+        if self.args.dataset in ['mini_imagenet', 'PlantVillage']:
             if strategy == 'SSL':
                 self.encoder = models.resnet50(pretrained=False)
                 self.encoder.fc = Identity()
@@ -70,15 +70,9 @@ class MYNET(nn.Module):
 
     def forward_metric(self, x):
         feat = self.encode(x)
-        if 'cos' in self.mode:
+        x = F.linear(F.normalize(feat, p=2, dim=-1), F.normalize(self.fc.weight, p=2, dim=-1))
+        x = self.args.temperature * x
 
-            x = F.linear(F.normalize(feat, p=2, dim=-1), F.normalize(self.fc.weight, p=2, dim=-1))
-
-            x = self.args.temperature * x
-
-        elif 'dot' in self.mode:
-            x = self.fc(feat)
-            x = self.args.temperature * x
         return x, feat
 
 
@@ -122,12 +116,6 @@ class MYNET(nn.Module):
             self.fc.weight.data[class_index]=proto
         new_fc=torch.stack(new_fc,dim=0)
         return new_fc
-
-    def get_logits(self,x,fc):
-        if 'dot' in self.args.new_mode:
-            return F.linear(x,fc)
-        elif 'cos' in self.args.new_mode:
-            return self.args.temperature * F.linear(F.normalize(x, p=2, dim=-1), F.normalize(fc, p=2, dim=-1))
 
     def ssl_train_loop(self, epoch, train_loader, optimizer):
         self.train()

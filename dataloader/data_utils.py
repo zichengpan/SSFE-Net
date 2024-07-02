@@ -6,7 +6,6 @@ def set_up_datasets(args):
 
     if args.dataset == 'cub200':
         import dataloader.cub200.cub200 as Dataset
-        import dataloader.cub200.cub200_ssl as SSLDataset
 
         args.base_class = 100
         args.num_classes = 200
@@ -16,13 +15,21 @@ def set_up_datasets(args):
 
     if args.dataset == 'mini_imagenet':
         import dataloader.miniimagenet.miniimagenet as Dataset
-        import dataloader.miniimagenet.miniimagenet_ssl as SSLDataset
 
         args.base_class = 60
         args.num_classes=100
         args.way = 5
         args.shot = 5
         args.sessions = 9
+
+    if args.dataset == 'PlantVillage':
+        import dataloader.plantvillage.plantvillage as Dataset
+
+        args.base_class = 20
+        args.num_classes=38
+        args.way = 3
+        args.shot = 5
+        args.sessions = 7
 
     args.Dataset=Dataset
     return args
@@ -35,7 +42,6 @@ def get_dataloader(args,session):
     return trainset, trainloader, testloader
 
 def get_base_dataloader(args):
-    txt_path = "data/index_list/" + args.dataset + "/session_" + str(0 + 1) + '.txt'
     class_index = np.arange(args.base_class)
 
     if args.dataset == 'cub200':
@@ -48,6 +54,11 @@ def get_base_dataloader(args):
                                              index=class_index, base_sess=True)
         testset = args.Dataset.MiniImageNet(root=args.dataroot, train=False, index=class_index)
 
+    if args.dataset == 'PlantVillage':
+        trainset = args.Dataset.PlantVillage(root=args.dataroot, train=True,
+                                             index=class_index, base_sess=True)
+        testset = args.Dataset.PlantVillage(root=args.dataroot, train=False, index=class_index)
+
     trainloader = torch.utils.data.DataLoader(dataset=trainset, batch_size=args.batch_size_base, shuffle=True,
                                               num_workers=8, pin_memory=True)
     testloader = torch.utils.data.DataLoader(
@@ -58,7 +69,7 @@ def get_base_dataloader(args):
 
 
 def get_base_dataloader_meta(args):
-    txt_path = "data/index_list/" + args.dataset + "/session_" + str(0 + 1) + '.txt'
+    txt_path = args.dataroot+"/index_list/" + args.dataset + "/session_" + str(0 + 1) + '.txt'
     class_index = np.arange(args.base_class)
 
     if args.dataset == 'cub200':
@@ -70,6 +81,11 @@ def get_base_dataloader_meta(args):
         trainset = args.Dataset.MiniImageNet(root=args.dataroot, train=True,
                                              index_path=txt_path)
         testset = args.Dataset.MiniImageNet(root=args.dataroot, train=False,
+                                            index=class_index)
+    if args.dataset == 'PlantVillage':
+        trainset = args.Dataset.PlantVillage(root=args.dataroot, train=True,
+                                             index_path=txt_path)
+        testset = args.Dataset.PlantVillage(root=args.dataroot, train=False,
                                             index=class_index)
 
     sampler = CategoriesSampler(trainset.targets, args.train_episode, args.episode_way,
@@ -84,13 +100,16 @@ def get_base_dataloader_meta(args):
     return trainset, trainloader, testloader
 
 def get_new_dataloader(args,session):
-    txt_path = "data/index_list/" + args.dataset + "/session_" + str(session + 1) + '.txt'
+    txt_path = args.dataroot+"/index_list/" + args.dataset + "/session_" + str(session + 1) + '.txt'
 
     if args.dataset == 'cub200':
         trainset = args.Dataset.CUB200(root=args.dataroot, train=True,
                                        index_path=txt_path)
     if args.dataset == 'mini_imagenet':
         trainset = args.Dataset.MiniImageNet(root=args.dataroot, train=True,
+                                       index_path=txt_path)
+    if args.dataset == 'PlantVillage':
+        trainset = args.Dataset.PlantVillage(root=args.dataroot, train=True,
                                        index_path=txt_path)
 
     if args.batch_size_new == 0:
@@ -110,6 +129,9 @@ def get_new_dataloader(args,session):
     if args.dataset == 'mini_imagenet':
         testset = args.Dataset.MiniImageNet(root=args.dataroot, train=False,
                                       index=class_new)
+    if args.dataset == 'PlantVillage':
+        testset = args.Dataset.PlantVillage(root=args.dataroot, train=False,
+                                      index=class_new)
 
     testloader = torch.utils.data.DataLoader(dataset=testset, batch_size=args.test_batch_size, shuffle=False,
                                              num_workers=args.num_workers, pin_memory=True)
@@ -118,9 +140,8 @@ def get_new_dataloader(args,session):
 
 
 def get_ssl_dataloader(args):
-    train_path = "./data" +'/index_list/' +args.dataset + '/session_' + str(0 + 1) + '.txt'
-    # test_path = "filelists/" + args.dataset + '/index_list/test.txt'
-    dataroot = './data'
+    dataroot = args.dataroot
+    train_path = dataroot +'/index_list/' +args.dataset + '/session_' + str(0 + 1) + '.txt'
     class_index = np.arange(args.base_class)
 
     if args.dataset == 'cub200':
@@ -135,21 +156,9 @@ def get_ssl_dataloader(args):
         testset = SSLDataset.MiniImageNet(root=dataroot, train=False, index=class_index, n_shot=args.SSL_shot, n_query=args.SSL_query)
 
     if args.dataset == 'PlantVillage':
-        import data.plantvillage as Dataset
-        trainset = Dataset.PlantVillage(root=dataroot, train=True, index_path=train_path, n_shot=args.SSL_shot, n_query=args.SSL_query)
-        testset = Dataset.PlantVillage(root=dataroot, train=False, index=class_index, n_shot=args.SSL_shot, n_query=args.SSL_query)
-
-    if args.dataset == 'cotton':
-        import data.cotton as Dataset
-
-        trainset = Dataset.Cotton(root=dataroot, train=True, index_path=train_path, n_shot=args.SSL_shot, n_query=args.SSL_query)
-        testset = Dataset.Cotton(root=dataroot, train=False, index_path=train_path, n_shot=args.SSL_shot, n_query=args.SSL_query, ssl=True)
-
-    if args.dataset == 'soy':
-        import data.soy as Dataset
-
-        trainset = Dataset.Soy(root=dataroot, train=True, index_path=train_path, n_shot=args.SSL_shot, n_query=args.SSL_query)
-        testset = Dataset.Soy(root=dataroot, train=False, index_path=train_path, n_shot=args.SSL_shot, n_query=args.SSL_query, ssl=True)
+        import dataloader.plantvillage.plantvillage_ssl as SSLDataset
+        trainset = SSLDataset.PlantVillage(root=dataroot, train=True, index_path=train_path, n_shot=args.SSL_shot, n_query=args.SSL_query)
+        testset = SSLDataset.PlantVillage(root=dataroot, train=False, index=class_index, n_shot=args.SSL_shot, n_query=args.SSL_query)
 
     train_sampler = EpisodicBatchSampler(len(trainset), n_way=args.SSL_way, n_episodes=100)
     trainloader = torch.utils.data.DataLoader(dataset=trainset, batch_sampler=train_sampler, num_workers=8,

@@ -5,18 +5,39 @@ Code for "SSFE-Net: Self-Supervised Feature Enhancement for Ultra-Fine-Grained F
 Ultra-Fine-Grained Visual Categorization (ultra-FGVC) has become a popular problem due to its great real-world potential for classifying the same or closely related species with very similar layouts. However, there present many challenges for the existing ultra-FGVC methods, firstly there are always not enough samples in the existing ultra-FGVC datasets based on which the models can easily get overfitting. Secondly, in practice, we are likely to find new species that we have not seen before and need to add them to existing models, which is known as incremental learning. The existing methods solve these problems by Few-Shot Class Incremental Learning (FSCIL), but the main challenge of the FSCIL models on ultra-FGVC tasks lies in their inferior discrimination detection ability since they usually use low-capacity networks to extract features, which leads to insufficient discriminative details extraction from ultra-fine-grained images. In this paper, a self-supervised feature enhancement for the few-shot incremental learning network (SSFE-Net) is proposed to solve this problem. Specifically, a self-supervised learning (SSL) and knowledge distillation (KD) framework is developed to enhance the feature extraction of the low-capacity backbone network for ultra-FGVC few-shot class incremental learning tasks. Besides, we for the first time create a series of benchmarks for FSCIL tasks on two public ultra-FGVC datasets and three normal fine-grained datasets, which will facilitate the development of the Ultra-FGVC community. Extensive experimental results on public ultra-FGVC datasets and other state-of-the-art benchmarks consistently demonstrate the effectiveness of the proposed method.
 
 ## Dataset
-We provide the source code on two benchmark datasets at the moment, i.e., CUB200 and miniImageNet. The source code for the Ultra-FGVC part of the training will be updated shortly. For the existing two datasets, please follow the guidelines in [CEC](https://github.com/icoz69/CEC-CVPR2021) to prepare them.
+We provide the source code on two benchmark datasets at the moment, i.e., CUB200, Mini-ImageNet, and PlantVillage. The source code for the Ultra-FGVC part of the training will be updated shortly. For the CUB200 and Mini-ImageNet datasets, please follow the guidelines in [CEC](https://github.com/icoz69/CEC-CVPR2021) to prepare them.
 
+### PlantVillage Dataset:
+Download the PlantVillage dataset from [this link](https://github.com/spMohanty/PlantVillage-Dataset/tree/master/raw/color). Organize the dataset according to the structure required for incremental learning as outlined below:
+
+```
+dataroot
+|–– index_list/
+|–– CUB_200_2011/
+|–– miniimagenet/
+|–– PlantVillage/
+|   |–– images/
+|   |   |–– 1.JPG
+|   |   |–– 2.JPG
+|   |   |–– ...
+|   |–– split/
+|   |   |–– train.csv
+|   |   |–– test.csv
+```
 
 ## Training Scripts
 You can run the code by the following commands or simply use ```sh train.sh```.
 - Train CUB200
     ```
-    python train.py -project ssfe -dataset cub200 -base_mode 'ft_cos' -new_mode 'avg_cos' -gamma 0.25 -lr_base 0.005 -lr_new 0.1 -decay 0.0005 -epochs_base 100 -schedule Milestone -milestones 20 60 80 -gpu '0' -temperature 16 -dataroot ./data -batch_size_base 32 -from_scratch
+    python train.py -project ssfe -dataset cub200 -base_mode 'ft_cos' -new_mode 'avg_cos' -gamma 0.25 -lr_base 0.002 -lr_new 0.1 -decay 0.0005 -epochs_base 100 -schedule Milestone -milestones 20 60 80 -gpu 0 -temperature 16 -dataroot ./data -batch_size_base 32 -from_scratch
     ```
 - Train Mini-ImageNet
     ```
     python train.py -project ssfe -dataset mini_imagenet -base_mode 'ft_cos' -new_mode 'avg_cos' -gamma 0.1 -lr_base 0.1 -lr_new 0.1 -decay 0.0005 -epochs_base 100 -schedule Cosine -gpu 0 -temperature 16 -dataroot ./data -from_scratch
+    ```
+- Train PlantVillage
+    ```
+    python train.py -project ssfe -dataset PlantVillage -base_mode 'ft_cos' -new_mode 'avg_cos' -gamma 0.1 -lr_base 0.1 -lr_new 0.1 -decay 0.0005 -epochs_base 150 -schedule Milestone -milestones 60 90 -gpu '0' -temperature 16 -dataroot ./data -batch_size_base 32 -from_scratch
     ```
 
 ## Citation
@@ -40,3 +61,5 @@ We thank the following repos for providing helpful components/functions in our w
 - [CEC](https://github.com/icoz69/CEC-CVPR2021)
 
 - [FACT](https://github.com/zhoudw-zdw/CVPR22-Fact)
+
+- [PlantVillage](https://github.com/spMohanty/PlantVillage-Dataset/tree/master)

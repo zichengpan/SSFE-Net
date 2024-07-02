@@ -15,17 +15,17 @@ def base_train(model, trainloader, optimizer, scheduler, epoch, args, ssl_model=
 
         logits, feat = model(data)
 
-        logits_ = logits[:, :args.base_class]
+        ssl_logits = ssl_model.module.encoder(data)  # 2048
+        ssl_logits = ssl_model.module.converter(ssl_logits)
+
+        combine_feat = args.gamma_ssl*ssl_logits + args.beta*feat
+        combine_feat = F.linear(F.normalize(combine_feat, p=2, dim=-1), F.normalize(model.module.fc.weight, p=2, dim=-1)) * args.temperature
+
+        kl_loss = ssl_model.module.kl_loss(feat, ssl_logits)
+
+        logits_ = combine_feat[:, :args.base_class]
         loss = F.cross_entropy(logits_, train_label)
-        total_loss = loss
-
-        if ssl_model is not None:
-            ssl_logits = ssl_model.module.encoder(data)  # 2048
-            ssl_logits = ssl_model.module.converter(ssl_logits)
-
-            kl_loss = ssl_model.module.kl_loss(feat, ssl_logits)
-
-            total_loss = loss + 0.5*abs(kl_loss)
+        total_loss = loss + args.alpha*abs(kl_loss)
 
         acc = count_acc(logits_, train_label)
 

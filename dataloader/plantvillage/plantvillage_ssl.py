@@ -9,8 +9,7 @@ from torchvision import transforms
 
 identity = lambda x: x
 
-
-class MiniImageNet(Dataset):
+class PlantVillage(Dataset):
 
     def __init__(self, root='./filelists', train=True,
                  transform=None,
@@ -22,8 +21,8 @@ class MiniImageNet(Dataset):
         self.root = os.path.expanduser(root)
         self.transform = transform
         self.train = train  # training set or test set
-        self.IMAGE_PATH = os.path.join(root, 'miniimagenet/images')
-        self.SPLIT_PATH = os.path.join(root, 'miniimagenet/split')
+        self.IMAGE_PATH = os.path.join(root, 'PlantVillage/images')
+        self.SPLIT_PATH = os.path.join(root, 'PlantVillage/split')
 
         csv_path = osp.join(self.SPLIT_PATH, setname + '.csv')
         lines = [x.strip() for x in open(csv_path, 'r').readlines()][1:]
@@ -36,9 +35,8 @@ class MiniImageNet(Dataset):
         self.wnids = []
 
         for l in lines:
-            name, wnid = l.split(',')
+            name, wnid = l.split(';')
             path = osp.join(self.IMAGE_PATH, name)
-            # print(path)
             if wnid not in self.wnids:
                 self.wnids.append(wnid)
                 lb += 1
@@ -48,9 +46,9 @@ class MiniImageNet(Dataset):
 
         if train:
             self.transform = transforms.Compose([
-                transforms.Resize((96, 96)),
+                transforms.Resize((256, 256)),
                 # transforms.CenterCrop(224),
-                transforms.RandomResizedCrop(84),
+                transforms.RandomResizedCrop(224),
                 transforms.RandomHorizontalFlip(),
                 transforms.ToTensor(),
                 transforms.Normalize(mean=[0.485, 0.456, 0.406],
@@ -62,25 +60,24 @@ class MiniImageNet(Dataset):
                                           pin_memory=False)
             if incremental:
                 self.transform = transforms.Compose([
-                    transforms.Resize([92, 92]),
-                    transforms.CenterCrop(84),
+                    transforms.Resize((224, 224)),
+                    # transforms.CenterCrop(224),
                     transforms.ToTensor(),
                     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
                 ])
-
             if index is not None:
                 self.data, self.targets = self.SelectfromClasses(self.data, self.targets, index)
             else:
                 self.data, self.targets = self.SelectfromTxt(self.data2label, index_path)
         else:
             self.transform = transforms.Compose([
-                transforms.Resize([92, 92]),
-                transforms.CenterCrop(84),
+                transforms.Resize((224, 224)),
+
                 transforms.ToTensor(),
                 transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                      std=[0.229, 0.224, 0.225])])
             sub_data_loader_params = dict(batch_size=n_shot + n_query,
-                                          shuffle=True,
+                                          shuffle=False,
                                           num_workers=0,  # use main thread only or may receive multiple batches
                                           pin_memory=False)
 
@@ -107,7 +104,7 @@ class MiniImageNet(Dataset):
         index=[]
         lines = [x.strip() for x in open(index_path, 'r').readlines()]
         for line in lines:
-            index.append(line.split('/')[3])
+            index.append(line.split('/')[2])
         data_tmp = []
         targets_tmp = []
         for i in index:
@@ -144,21 +141,17 @@ class SubDataset:
         self.noise_rate = noise_rate
 
     def __getitem__(self, i):
-        # print( '%d -%d' %(self.cl,i))
         image_path = os.path.join(self.sub_meta[i])
         img = Image.open(image_path).convert('RGB')
         if self.noise_rate > 0.:
             if np.random.random() > (1 - self.noise_rate):
-                # img = np.array(img)
-                # img = (img + np.random.randint(0, 255, size=img.shape)) // 2
+
                 img = np.array(img)
                 img = np.random.randint(0, 255, size=img.shape)
                 img = Image.fromarray(img.astype('uint8'))
         img = self.transform(img)
         target = self.target_transform(self.cl)
-        # print("path:{}, label:{}".format(image_path, self.cl))
         return img, target
 
     def __len__(self):
         return len(self.sub_meta)
-

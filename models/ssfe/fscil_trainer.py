@@ -43,7 +43,7 @@ class FSCILTrainer(Trainer):
                                      {'params': ssl_model.module.predictor.parameters(), 'lr': lr},
                                      ], weight_decay=5e-4)
 
-        exp_lr_scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[20, 40], gamma=0.1)
+        exp_lr_scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[20, 40], gamma=args.gamma)
 
         max_acc = 0
         max_epoch = 0
@@ -129,7 +129,6 @@ class FSCILTrainer(Trainer):
                         self.trlog['max_acc_epoch'] = epoch
                         save_model_dir = os.path.join(args.save_path, 'session' + str(session) + '_max_acc.pth')
                         torch.save(dict(params=self.model.state_dict()), save_model_dir)
-                        # torch.save(optimizer.state_dict(), os.path.join(args.save_path, 'optimizer_best.pth'))
                         self.best_model_dict = deepcopy(self.model.state_dict())
                         print('********A better model is found!!**********')
                         print('Saving model to :%s' % save_model_dir)
@@ -179,7 +178,6 @@ class FSCILTrainer(Trainer):
                 # save model
                 self.trlog['max_acc'][session] = float('%.3f' % (tsa * 100))
                 save_model_dir = os.path.join(args.save_path, 'session' + str(session) + '_max_acc.pth')
-                #torch.save(dict(params=self.model.state_dict()), save_model_dir)
                 self.best_model_dict = deepcopy(self.model.state_dict())
                 print('Saving model to :%s' % save_model_dir)
                 print('  test acc={:.3f}'.format(self.trlog['max_acc'][session]))

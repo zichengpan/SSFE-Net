@@ -12,7 +12,7 @@ def get_command_line_parser():
     # about dataset and network
     parser.add_argument('-project', type=str, default=PROJECT)
     parser.add_argument('-dataset', type=str, default='cub200',
-                        choices=['mini_imagenet', 'cub200'])
+                        choices=['mini_imagenet', 'cub200', 'PlantVillage'])
     parser.add_argument('-dataroot', type=str, default=DATA_DIR)
 
     # about pre-training
@@ -44,13 +44,17 @@ def get_command_line_parser():
     parser.add_argument('-from_scratch', action='store_true')
 
     # about training
-    parser.add_argument('-gpu', default='0,1')
+    parser.add_argument('-gpu', default='0')
     parser.add_argument('-num_workers', type=int, default=8)
     parser.add_argument('-seed', type=int, default=1993)
     parser.add_argument('-debug', action='store_true')
     parser.add_argument('-SSL_way', type=int, default=5)
     parser.add_argument('-SSL_shot', type=int, default=5)
     parser.add_argument('-SSL_query', type=int, default=5)
+    parser.add_argument('-beta', type=int, default=0.8)
+    parser.add_argument('-gamma_ssl', type=int, default=0.2)
+    parser.add_argument('-alpha', type=int, default=0.9)
+
     return parser
 
 
